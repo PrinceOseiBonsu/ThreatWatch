@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreatWatch — Threat Intelligence Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container { max-width: 680px; width: 90%; padding: 40px 0; text-align: center; }
+
+        .logo { font-size: 64px; margin-bottom: 16px; }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #dc2626, #ea580c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            display: inline-block;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #dc2626;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        p.subtitle {
+            color: #64748b;
+            font-size: 15px;
+            margin-bottom: 48px;
+            line-height: 1.6;
+        }
+
+        .search-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+
+        .search-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            display: block;
+            text-align: left;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: #1a1a2e;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 16px;
+        }
+
+        .search-input:focus {
+            border-color: #dc2626;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+        }
+
+        .search-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #dc2626, #ea580c);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(220,38,38,0.25);
+        }
+
+        .search-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(220,38,38,0.35);
+        }
+
+        .examples {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .example-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.2s;
+        }
+
+        .example-btn:hover {
+            border-color: #dc2626;
+            color: #dc2626;
+            background: #fff5f5;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .feature {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .feature:hover { transform: translateY(-3px); }
+
+        .feature-icon { font-size: 28px; margin-bottom: 10px; }
+        .feature-title { font-size: 13px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+        .feature-desc { font-size: 11px; color: #94a3b8; line-height: 1.5; }
+
+        .apis {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .api-badge {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 11px;
+            color: #64748b;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #dc2626;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        /* Recent searches */
+        .recent-section { margin-bottom: 24px; text-align: left; }
+        .recent-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+        .recent-list { display: flex; flex-direction: column; gap: 8px; }
+        .recent-item {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        .recent-item:hover {
+            border-color: #dc2626;
+            transform: translateX(4px);
+        }
+        .recent-query {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .recent-meta { font-size: 11px; color: #94a3b8; }
+        .recent-badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .badge-critical { background: #fee2e2; color: #dc2626; }
+        .badge-high { background: #fff7ed; color: #ea580c; }
+        .badge-medium { background: #fffbeb; color: #d97706; }
+        .badge-low { background: #eff6ff; color: #2563eb; }
+        .badge-clean { background: #dcfce7; color: #16a34a; }
+
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(240,244,248,0.97);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #fee2e2;
+            border-top: 4px solid #dc2626;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text { font-size: 18px; font-weight: 700; color: #dc2626; }
+        .loading-sub { font-size: 13px; color: #94a3b8; }
+        .loading-steps { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+        .loading-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #94a3b8;
+            background: #fff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .powered { margin-top: 32px; font-size: 12px; color: #94a3b8; }
+
+        @media (max-width: 480px) {
+            .features { grid-template-columns: 1fr; }
+            h1 { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">🔍 Investigating Threat...</div>
+        <div class="loading-sub">Querying multiple threat intelligence sources</div>
+        <div class="loading-steps">
+            <div class="loading-step">🦠 Checking VirusTotal — 70+ antivirus engines</div>
+            <div class="loading-step">🚨 Checking AbuseIPDB — abuse reports database</div>
+            <div class="loading-step">🌍 Checking IPInfo — geolocation intelligence</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="logo">🔍</div>
+        <h1>ThreatWatch</h1>
+        <div class="tagline">Threat Intelligence Dashboard</div>
+        <p class="subtitle">
+            Investigate suspicious IPs, domains and file hashes<br>
+            against multiple threat intelligence sources in seconds
+        </p>
+
+        {% if error %}
+        <div class="error">⚠️ {{ error }}</div>
+        {% endif %}
+
+        <div class="search-card">
+            <form action="/scan" method="POST" id="searchForm">
+                <label class="search-label">Enter IP Address, Domain or File Hash</label>
+                <input
+                    type="text"
+                    name="query"
+                    class="search-input"
+                    placeholder="e.g. 8.8.8.8 or google.com or abc123..."
+                    required
+                    autocomplete="off"
+                    spellcheck="false"
+                    id="searchInput"
+                >
+                <button type="submit" class="search-btn">
+                    🔍 Analyze Threat
+                </button>
+            </form>
+            <div class="examples">
+                <span class="example-btn" onclick="setQuery('8.8.8.8')">8.8.8.8</span>
+                <span class="example-btn" onclick="setQuery('185.220.101.45')">185.220.101.45</span>
+                <span class="example-btn" onclick="setQuery('google.com')">google.com</span>
+                <span class="example-btn" onclick="setQuery('malware.com')">malware.com</span>
+            </div>
+        </div>
+
+        <!-- Recent Searches -->
+        <div class="recent-section" id="recentSection" style="display:none;">
+            <div class="recent-title">🕐 Recent Searches</div>
+            <div class="recent-list" id="recentList"></div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🦠</div>
+                <div class="feature-title">VirusTotal</div>
+                <div class="feature-desc">Checks against 70+ antivirus engines and threat databases</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🚨</div>
+                <div class="feature-title">AbuseIPDB</div>
+                <div class="feature-desc">Cross-references known malicious IPs and attack reports</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌍</div>
+                <div class="feature-title">IPInfo</div>
+                <div class="feature-desc">Geolocation, ISP and network intelligence data</div>
+            </div>
+        </div>
+
+        <div class="apis">
+            <span class="api-badge">✓ VirusTotal API</span>
+            <span class="api-badge">✓ AbuseIPDB API</span>
+            <span class="api-badge">✓ IPInfo API</span>
+            <span class="api-badge">✓ Real Time</span>
+        </div>
+
+        <p class="powered">Built by Prince Osei Bonsu · Voorhees University</p>
+    </div>
+
+    <script>
+        function setQuery(val) {
+            document.getElementById('searchInput').value = val;
+        }
+
+        // Loading overlay
+        document.getElementById('searchForm').addEventListener('submit', function() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        });
+
+        // Recent searches using localStorage
+        function getRecent() {
+            try {
+                return JSON.parse(localStorage.getItem('threatwatch_recent') || '[]');
+            } catch { return []; }
+        }
+
+        function saveRecent(query, level, score) {
+            let recent = getRecent();
+            recent = recent.filter(r => r.query !== query);
+            recent.unshift({ query, level, score, time: new Date().toLocaleTimeString() });
+            recent = recent.slice(0, 5);
+            localStorage.setItem('threatwatch_recent', JSON.stringify(recent));
+        }
+
+        function loadRecent() {
+            const recent = getRecent();
+            if (recent.length === 0) return;
+            document.getElementById('recentSection').style.display = 'block';
+            const list = document.getElementById('recentList');
+            list.innerHTML = recent.map(r => `
+                <div class="recent-item" onclick="setQuery('${r.query}')">
+                    <div>
+                        <div class="recent-query">${r.query}</div>
+                        <div class="recent-meta">${r.time}</div>
+                    </div>
+                    <span class="recent-badge badge-${r.level.toLowerCase()}">
+                        ${r.level} · ${r.score}/100
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        loadRecent();
+
+        // Check if coming back from results
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('q') && urlParams.get('level') && urlParams.get('score')) {
+            saveRecent(urlParams.get('q'), urlParams.get('level'), urlParams.get('score'));
+            loadRecent();
+        }
+    </script>
+</body>
+</html>

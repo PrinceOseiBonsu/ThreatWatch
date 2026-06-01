@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreatWatch — Results</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a1a2e;
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+        .container { max-width: 800px; width: 90%; margin: 0 auto; }
+
+        .header { margin-bottom: 28px; }
+        .header h1 { font-size: 28px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
+        .header p { color: #94a3b8; font-size: 13px; }
+
+        .score-card {
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        }
+        .score-card.critical { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+        .score-card.high { background: linear-gradient(135deg, #7c2d12, #ea580c); }
+        .score-card.medium { background: linear-gradient(135deg, #78350f, #d97706); }
+        .score-card.low { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+        .score-card.clean { background: linear-gradient(135deg, #14532d, #16a34a); }
+
+        .score-circle {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.15);
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+        .score-number { font-size: 34px; font-weight: 800; }
+        .score-label { font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .score-info h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        .score-info p { font-size: 13px; opacity: 0.7; margin-bottom: 10px; }
+
+        .threat-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .section-header {
+            font-size: 12px;
+            font-weight: 700;
+            color: #dc2626;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            margin-top: 24px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+
+        .engine-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .engine-stat {
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+        }
+        .engine-stat.malicious { background: #fee2e2; }
+        .engine-stat.suspicious { background: #fff7ed; }
+        .engine-stat.harmless { background: #dcfce7; }
+        .engine-stat.undetected { background: #f8fafc; }
+
+        .engine-number { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+        .engine-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .malicious .engine-number { color: #dc2626; }
+        .malicious .engine-label { color: #dc2626; }
+        .suspicious .engine-number { color: #ea580c; }
+        .suspicious .engine-label { color: #ea580c; }
+        .harmless .engine-number { color: #16a34a; }
+        .harmless .engine-label { color: #16a34a; }
+        .undetected .engine-number { color: #64748b; }
+        .undetected .engine-label { color: #64748b; }
+
+        .detection-bar {
+            width: 100%;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .detection-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #dc2626, #ea580c);
+        }
+        .detection-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .info-label {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .info-value {
+            font-size: 14px;
+            color: #1a1a2e;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .abuse-score-bar {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .abuse-score-fill {
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin: 2px;
+        }
+        .badge-red { background: #fee2e2; color: #dc2626; }
+        .badge-green { background: #dcfce7; color: #16a34a; }
+
+        .verdict-malicious { color: #dc2626; font-weight: 700; }
+        .verdict-suspicious { color: #ea580c; font-weight: 700; }
+        .verdict-clean { color: #16a34a; font-weight: 700; }
+
+        .actions { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+        .btn {
+            flex: 1;
+            min-width: 150px;
+            display: block;
+            text-align: center;
+            background: linear-gradient(135deg, #dc2626, #ea580c);
+            color: #fff;
+            border-radius: 12px;
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(220,38,38,0.25);
+        }
+        .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+        .btn-secondary {
+            background: #fff;
+            color: #1a1a2e;
+            border: 2px solid #e2e8f0;
+            box-shadow: none;
+        }
+        .btn-secondary:hover { background: #f8fafc; transform: translateY(-1px); }
+
+        .powered { text-align: center; margin-top: 32px; font-size: 12px; color: #94a3b8; }
+
+        @media (max-width: 480px) {
+            .score-card { flex-direction: column; text-align: center; }
+            .engine-grid { grid-template-columns: repeat(2, 1fr); }
+            .info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Threat Analysis Report</h1>
+            <p>Powered by VirusTotal · AbuseIPDB · IPInfo</p>
+        </div>
+
+        <!-- Threat Score Card -->
+        <div class="score-card {{ results.threat_level | lower }}">
+            <div class="score-circle">
+                <span class="score-number">{{ results.threat_score }}</span>
+                <span class="score-label">/ 100</span>
+            </div>
+            <div class="score-info">
+                <h2>{{ results.query }}</h2>
+                <p>
+                    Type: {{ results.query_type | upper }}
+                    {% if results.ipinfo and not results.ipinfo.error %}
+                    · {{ results.ipinfo.city }}, {{ results.ipinfo.country }}
+                    {% endif %}
+                </p>
+                <span class="threat-badge">
+                    {% if results.threat_level == 'CRITICAL' %}🚨 CRITICAL THREAT
+                    {% elif results.threat_level == 'HIGH' %}🔴 HIGH RISK
+                    {% elif results.threat_level == 'MEDIUM' %}⚠️ MEDIUM RISK
+                    {% elif results.threat_level == 'LOW' %}🔵 LOW RISK
+                    {% else %}✅ CLEAN{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- VirusTotal Results -->
+        {% if results.virustotal and not results.virustotal.error %}
+        <div class="section-header">🦠 VirusTotal Analysis</div>
+        <div class="card">
+            <div class="engine-grid">
+                <div class="engine-stat malicious">
+                    <div class="engine-number">{{ results.virustotal.malicious }}</div>
+                    <div class="engine-label">Malicious</div>
+                </div>
+                <div class="engine-stat suspicious">
+                    <div class="engine-number">{{ results.virustotal.suspicious }}</div>
+                    <div class="engine-label">Suspicious</div>
+                </div>
+                <div class="engine-stat harmless">
+                    <div class="engine-number">{{ results.virustotal.harmless }}</div>
+                    <div class="engine-label">Harmless</div>
+                </div>
+                <div class="engine-stat undetected">
+                    <div class="engine-number">{{ results.virustotal.undetected }}</div>
+                    <div class="engine-label">Undetected</div>
+                </div>
+            </div>
+
+            <div class="detection-label">
+                <span>Detection Rate</span>
+                <span>{{ results.virustotal.malicious }}/{{ results.virustotal.total_engines }} engines</span>
+            </div>
+            <div class="detection-bar">
+                <div class="detection-fill" style="width: {{ (results.virustotal.malicious / results.virustotal.total_engines * 100) if results.virustotal.total_engines > 0 else 0 }}%"></div>
+            </div>
+
+            <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <div class="info-label">Verdict</div>
+                    <div class="verdict-{{ results.virustotal.verdict | lower }}">
+                        {{ results.virustotal.verdict }}
+                    </div>
+                </div>
+                <div>
+                    <div class="info-label">Reputation Score</div>
+                    <div class="info-value">{{ results.virustotal.reputation }}</div>
+                </div>
+                {% if results.query_type == 'ip' %}
+                <div>
+                    <div class="info-label">Country</div>
+                    <div class="info-value">{{ results.virustotal.country }}</div>
+                </div>
+                <div>
+                    <div class="info-label">AS Owner</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.virustotal.as_owner }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- AbuseIPDB Results -->
+        {% if results.abuseipdb and not results.abuseipdb.error %}
+        <div class="section-header">🚨 AbuseIPDB Report</div>
+        <div class="card">
+            <div class="info-grid">
+                <div>
+                    <div class="info-label">Abuse Confidence Score</div>
+                    <div class="info-value" style="font-size: 24px; color: {% if results.abuseipdb.abuse_score >= 50 %}#dc2626{% elif results.abuseipdb.abuse_score >= 20 %}#ea580c{% else %}#16a34a{% endif %};">
+                        {{ results.abuseipdb.abuse_score }}%
+                    </div>
+                    <div class="abuse-score-bar">
+                        <div class="abuse-score-fill" style="width: {{ results.abuseipdb.abuse_score }}%; background: {% if results.abuseipdb.abuse_score >= 50 %}#dc2626{% elif results.abuseipdb.abuse_score >= 20 %}#ea580c{% else %}#16a34a{% endif %};"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="info-label">Total Abuse Reports</div>
+                    <div class="info-value" style="font-size: 24px;">{{ results.abuseipdb.total_reports }}</div>
+                </div>
+                <div>
+                    <div class="info-label">ISP</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.abuseipdb.isp }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Last Reported</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.abuseipdb.last_reported or 'Never' }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Country</div>
+                    <div class="info-value">{{ results.abuseipdb.country }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Tor Exit Node</div>
+                    <div class="info-value">
+                        {% if results.abuseipdb.is_tor %}
+                        <span class="badge badge-red">YES — TOR NODE</span>
+                        {% else %}
+                        <span class="badge badge-green">NO</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- IPInfo Results -->
+        {% if results.ipinfo and not results.ipinfo.error %}
+        <div class="section-header">🌍 Network Intelligence</div>
+        <div class="card">
+            <div class="info-grid">
+                <div>
+                    <div class="info-label">Location</div>
+                    <div class="info-value">{{ results.ipinfo.city }}, {{ results.ipinfo.region }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Country</div>
+                    <div class="info-value">{{ results.ipinfo.country }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Organization / ISP</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.ipinfo.org }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Timezone</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.ipinfo.timezone }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Coordinates</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.ipinfo.loc }}</div>
+                </div>
+                <div>
+                    <div class="info-label">IP Address</div>
+                    <div class="info-value">{{ results.ipinfo.ip }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Domain Info -->
+        {% if results.query_type == 'domain' and results.virustotal and not results.virustotal.error %}
+        <div class="section-header">🌐 Domain Information</div>
+        <div class="card">
+            <div class="info-grid">
+                <div>
+                    <div class="info-label">Registrar</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.virustotal.registrar or 'Unknown' }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Creation Date</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.virustotal.creation_date or 'Unknown' }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- File Hash Info -->
+        {% if results.query_type == 'hash' and results.virustotal and not results.virustotal.error %}
+        <div class="section-header">📄 File Information</div>
+        <div class="card">
+            <div class="info-grid">
+                <div>
+                    <div class="info-label">File Name</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.virustotal.file_name or 'Unknown' }}</div>
+                </div>
+                <div>
+                    <div class="info-label">File Type</div>
+                    <div class="info-value" style="font-size: 12px;">{{ results.virustotal.file_type or 'Unknown' }}</div>
+                </div>
+                <div>
+                    <div class="info-label">File Size</div>
+                    <div class="info-value">{{ results.virustotal.file_size }} bytes</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="actions">
+            <a href="/?q={{ results.query }}&level={{ results.threat_level }}&score={{ results.threat_score }}" class="btn">🔍 Analyze Another</a>
+            <a href="/" class="btn btn-secondary">🏠 Home</a>
+        </div>
+
+        <p class="powered">Built by Prince Osei Bonsu · Voorhees University</p>
+    </div>
+</body>
+</html>
