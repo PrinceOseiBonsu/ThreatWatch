@@ -4,9 +4,9 @@
 import requests
 import os
 
-VIRUSTOTAL_API_KEY = os.environ.get("VIRUSTOTAL_API_KEY", "078d18803418c2ce4ceee265bd39a2584b410c4b348b1d26268b4ef6536b5ea2")
-ABUSEIPDB_API_KEY = os.environ.get("ABUSEIPDB_API_KEY", "0208a1059e2f8b2af362e106fa3a764ec847792e2fe24b117c3cf9b00be08a1790f5b5fbf1a04f87")
-IPINFO_API_KEY = os.environ.get("IPINFO_API_KEY", "5bb05f73861f2f")
+VIRUSTOTAL_API_KEY = os.environ.get("VIRUSTOTAL_API_KEY", "")
+ABUSEIPDB_API_KEY = os.environ.get("ABUSEIPDB_API_KEY", "")
+IPINFO_API_KEY = os.environ.get("IPINFO_API_KEY", "")
 
 def check_virustotal(query, query_type):
     """Check IP, domain or file hash against VirusTotal"""
